@@ -2,39 +2,28 @@
 # n - jakie dlugosci? (1 bez sensu troche, 2 chyba tez ...)
 # 1 <= r <= 26
 # dlugosci ciagow - pozwolic na 1? - max n
-
+import random
 from string import ascii_lowercase
-seq = []
-# n - liczba żetonów
-# r - liczba kolorów
-# coloursDict - słownik litera:długość ciągu
-# seq - aktualny ciąg
 
-
-def winningComputerCondition(coloursDict):
+def winningComputerCondition():
     # sprawdza czy wygrana komputera
-    for i in coloursDict:
-        win = checkSeq(i, coloursDict)
-        if win:
-            return True
+    global coloursDict, seq
+
+    for letter in coloursDict.keys():
+        if coloursDict[letter] == 1:
+            if letter in seq:
+                return True
+
+    for letter_idx in range(len(seq)):  # letter index
+        letter = seq[letter_idx]
+        for prog in range(1, len(seq) - letter_idx):  # progression
+            cnt = 0  # counter
+            while (letter_idx + cnt * prog) < len(seq) and seq[letter_idx + cnt * prog] == letter:
+                cnt += 1
+            if cnt >= coloursDict[letter]:
+                return True
+
     return False
-
-
-def checkSeq(letter, coloursDict):
-    # sprawdza miejsca pojawienia się danej litery w ciągu (seq)
-    # następnie sprawdza czy występuje jakikolwiek ciąg spełniający warunki
-    indexes = []
-
-    for i in range(len(seq)):
-        if seq[i] == letter:
-            indexes.append(i)
-
-    if len(indexes) < coloursDict[letter]:
-        return False
-
-    ### poszukiwanie ciagow
-    ### sprawdzić długość znalezionych ciągów
-    ### jak znalezione o dobrej długości, to super, return True
 
 
 def computer():
@@ -42,87 +31,100 @@ def computer():
     # ALGORYTM - znajduje miejsce do wstawienia "_"
     # oznaczone np nr indeksu poprzedzającego miejsce wstawienia
     # wtedy podzielić, wstawić _
+    global coloursDict, seq, n, r
     print(seq)
     '''
 
     :return:
     '''
 
+def computer_random():
+    # tura komputera; losowa strategia
+    global coloursDict, seq, n, r
+    pos = random.randint(0, len(seq)) # pozycja, którą wybrał komputer
+    seq.insert(pos, '_')
+    return pos
 
-def player(coloursDict, n):
+
+def player(pos):
     # odpowiada za turę gracza
+    global coloursDict, seq, n, r
     print("Wstaw kolor (dostępne", list(coloursDict.keys()), "): ")
     col = input()
     ### obsluga bledow
     ### _ w seq = col
     ### ewentualnie mozna przekazywac nr indeksu z funkcji computer
     ### i po prostu zamienic
-    print(seq)
+    seq[pos] = col
     print("Pozostało żetonów: ", n-len(seq))
 
-def valuesToList(values):
-    # funkcja zmieniająca podane przez gracza długości ciągów
-    # w listę, potrzebna do utworzenia słownika
+def createColoursDict(values):
+    # input -> dict
+    global coloursDict, seq, n, r
     a_list = values.split()
     map_object = map(int, a_list)
     list_of_integers = list(map_object)
-    return list_of_integers
-
-
-def createColoursDict(r, values):
-    # utworzenie słownika litera:długość ciągu
     keys = list(ascii_lowercase)[:r]
-    coloursDict = dict(zip(keys, values))
-    return coloursDict
+    coloursDict = dict(zip(keys, list_of_integers))
 
 ### można dodać jeszcze funkcje ładnie wyświetlające
 ### np aktualny ciąg (seq) albo litery (podawane przy
 ### pobraniu danych i następnie w turze gracza)
 
 def main():
-
+    global coloursDict, seq, n, r
     ###### Wstępny prompt #####
+    while True:
 
-    print("Grasz w grę")
-    print("Jesteś graczem")
-    print("Twoje zadanie to")
-    print("############")
+        # n - liczba żetonów
+        n = None
+        # r - liczba kolorów
+        r = None
+        # coloursDict - słownik litera:długość ciągu
+        coloursDict = {}
+        # seq - aktualny ciąg
+        seq = []
 
-    ##### Pobranie wartości #####
+        print("Grasz w grę")
+        print("Jesteś graczem")
+        print("Twoje zadanie to")
+        print("############")
 
-    n = int(input("Podaj liczbę żetonów: "))
-    r = int(input("Podaj liczbę dopuszczalnych kolorów: "))
-    ### moze zmienic na po przecinkach litery (albo po spacjach)
-    print("Kolory to: ", list(ascii_lowercase)[:r])
-    values = input("Podaj długości ciągów (liczby naturalne oddzielone spacją): ")
-    ### dodac obsluge wyjatkow / bledow
+        ##### Pobranie wartości #####
 
-    ##### Przygotowanie słownika #####
+        n = int(input("Podaj liczbę żetonów: "))
+        r = int(input("Podaj liczbę dopuszczalnych kolorów: "))
+        ### moze zmienic na po przecinkach litery (albo po spacjach)
+        print("Kolory to: ", list(ascii_lowercase)[:r])
+        values = input("Podaj długości ciągów (liczby naturalne oddzielone spacją): ")
+        ### dodac obsluge wyjatkow / bledow
 
-    values = valuesToList(values)
-    coloursDict = createColoursDict(r, values)
+        ##### Przygotowanie słownika #####
+        createColoursDict(values)
+        print(coloursDict)
 
-    ##### Gra właściwa #####
+        ##### Gra właściwa #####
 
-    win = False
-    while not win and len(seq) < n:
-        computer()
-        player(coloursDict, n)
-        print()
-        win = winningComputerCondition(coloursDict)
+        win = False
+        while not win and len(seq) < n:
+            position = computer_random()
+            print(seq)
+            player(position)
+            print(seq)
+            win = winningComputerCondition()
 
-    if win:
-        print("Wygrana komputera")
-    else:
-        print("Wygrana gracza")
+        if win:
+            print("Wygrana komputera")
+        else:
+            print("Wygrana gracza")
 
-    ##### Po zakończeniu #####
-    cont = input("Czy chcesz zagrać ponownie? [y/n]")
-    if cont.lower =="y":
-        print("gramy dalej")
-        ### gramy dalej
-    else:
-        return 0
+        ##### Po zakończeniu #####
+        cont = input("Czy chcesz zagrać ponownie? [y/n]")
+        if cont.lower() == "y":
+            print("gramy  \n\n\n")
+            ### gramy dalej
+        else:
+            return 0
 
 
 if __name__ == "__main__":
