@@ -2,10 +2,11 @@
 # n - jakie dlugosci? (1 bez sensu troche, 2 chyba tez ...)
 # 1 <= r <= 26
 # dlugosci ciagow - pozwolic na 1? - max n
+
 import random
 from string import ascii_lowercase
 
-def winningComputerCondition():
+def winning_computer_condition():
     # sprawdza czy wygrana komputera
     global coloursDict, seq
 
@@ -48,8 +49,8 @@ def computer_random():
 
 def player(pos):
     # odpowiada za turę gracza
-    global coloursDict, seq, n, r
-    print("Wstaw kolor (dostępne", list(coloursDict.keys()), "): ")
+    global coloursDict, seq, n, r, str
+    print("Wstaw kolor ( dostępne", str, "): ")
     col = input()
     ### obsluga bledow
     ### _ w seq = col
@@ -58,21 +59,36 @@ def player(pos):
     seq[pos] = col
     print("Pozostało żetonów: ", n-len(seq))
 
-def createColoursDict(values):
+
+def create_colours_dict(values):
     # input -> dict
-    global coloursDict, seq, n, r
+    global coloursDict, seq, n, r, lett
     a_list = values.split()
     map_object = map(int, a_list)
     list_of_integers = list(map_object)
-    keys = list(ascii_lowercase)[:r]
+    keys = lett
     coloursDict = dict(zip(keys, list_of_integers))
 
-### można dodać jeszcze funkcje ładnie wyświetlające
-### np aktualny ciąg (seq) albo litery (podawane przy
-### pobraniu danych i następnie w turze gracza)
+
+def print_seq():
+    global seq
+    r = ""
+    for i in seq:
+        r += i
+    print(r)
+
+
+def make_str():
+    global lett, str
+    for i in lett:
+        str = str + i + ", "
+    str = str[:-2]
+    return str
+
+
 
 def main():
-    global coloursDict, seq, n, r
+    global coloursDict, seq, n, r, lett, str
     ###### Wstępny prompt #####
     while True:
 
@@ -84,23 +100,31 @@ def main():
         coloursDict = {}
         # seq - aktualny ciąg
         seq = []
+        # lett - lista używanych kolorów
+        lett = []
+        # str - ładne wyświetlanie kolorów
+        str = ""
 
-        print("Grasz w grę")
-        print("Jesteś graczem")
-        print("Twoje zadanie to")
-        print("############")
+        print("\nLiczby Off-diagonal Van der Waerdena online")
+        print("Jesteś graczem 2. Razem z graczem 1 budujecie ciąg żetonów o maksymalnej długości n za pomocą r kolorów.")
+        print("Gracz 1 wybiera miejsce, w które musisz wstawić żeton (oznaczone \"_\"). Wybierasz kolor żetonu, jaki wstawisz w to miejsce.")
+        print("Twoim zadaniem jest niedopuszczenie do ułożenia ciągu arytmetycznego z dowolnego z kolorów o długości przypisanej do tego koloru.")
+        print("Gra kończy się zatem, gdy zostanie ułożone n żetonów (wygrana gracza 2) lub zostanie ułożony ciag arytmetyczny z dowolnego koloru o zadanej długości (wygrana gracza 1).")
+        print("Powodzenia!\n")
+        print("############\n")
 
         ##### Pobranie wartości #####
 
         n = int(input("Podaj liczbę żetonów: "))
         r = int(input("Podaj liczbę dopuszczalnych kolorów: "))
-        ### moze zmienic na po przecinkach litery (albo po spacjach)
-        print("Kolory to: ", list(ascii_lowercase)[:r])
+        lett = list(ascii_lowercase)[:r]
+        str = make_str()
+        print("Kolory to:", str)
         values = input("Podaj długości ciągów (liczby naturalne oddzielone spacją): ")
         ### dodac obsluge wyjatkow / bledow
 
         ##### Przygotowanie słownika #####
-        createColoursDict(values)
+        create_colours_dict(values)
         print(coloursDict)
 
         ##### Gra właściwa #####
@@ -108,10 +132,10 @@ def main():
         win = False
         while not win and len(seq) < n:
             position = computer_random()
-            print(seq)
+            print_seq()
             player(position)
-            print(seq)
-            win = winningComputerCondition()
+            print_seq()
+            win = winning_computer_condition()
 
         if win:
             print("Wygrana komputera")
@@ -119,7 +143,7 @@ def main():
             print("Wygrana gracza")
 
         ##### Po zakończeniu #####
-        cont = input("Czy chcesz zagrać ponownie? [y/n]")
+        cont = input("Czy chcesz zagrać ponownie? [y/n]: ")
         if cont.lower() == "y":
             print("gramy  \n\n\n")
             ### gramy dalej
