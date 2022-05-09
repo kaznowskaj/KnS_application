@@ -70,6 +70,37 @@ def create_colours_dict(values):
     coloursDict = dict(zip(keys, list_of_integers))
 
 
+def find_position():
+    # główna funkcja algorytmu
+    # sprawdza ocenę sytuacji dla każdego koloru na każdej pozycji
+    # znajduje najgorszy scoring w danej pozycji
+    # a następnie zwraca pozycję z najmniejszym z powyższych scoringów
+    global seq, coloursDict
+
+    maxValues = []
+
+    for pos in range(len(seq)+1):
+        values = []
+        for col in coloursDict.keys:
+            new_seq = seq
+            value = ocen_sytuacje(new_seq.insert(pos, col))
+            values.append(value)
+        maxValues.append(max(values))
+
+    minValue = min(maxValues)
+    min_index = maxValues.index(minValue)
+
+    return min_index
+
+
+def ocen_sytuacje(ciag):
+    '''
+
+    :param ciag:
+    :return:
+    '''
+
+
 def print_seq():
     global seq
     r = ""
@@ -145,7 +176,7 @@ def main():
         ##### Po zakończeniu #####
         cont = input("Czy chcesz zagrać ponownie? [y/n]: ")
         if cont.lower() == "y":
-            print("gramy  \n\n\n")
+            print("Nowa gra \n\n\n")
             ### gramy dalej
         else:
             return 0
