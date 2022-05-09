@@ -5,6 +5,8 @@
 
 import random
 from string import ascii_lowercase
+import numpy as np
+from copy import deepcopy
 
 def winning_computer_condition():
     # sprawdza czy wygrana komputera
@@ -33,11 +35,10 @@ def computer():
     # oznaczone np nr indeksu poprzedzającego miejsce wstawienia
     # wtedy podzielić, wstawić _
     global coloursDict, seq, n, r
-    print(seq)
-    '''
+    pos = find_position()  # pozycja, którą wybrał komputer
+    seq.insert(pos, '_')
+    return pos
 
-    :return:
-    '''
 
 def computer_random():
     # tura komputera; losowa strategia
@@ -81,9 +82,10 @@ def find_position():
 
     for pos in range(len(seq)+1):
         values = []
-        for col in coloursDict.keys:
-            new_seq = seq
-            value = ocen_sytuacje(new_seq.insert(pos, col))
+        for col in coloursDict.keys():
+            new_seq = deepcopy(seq)
+            new_seq.insert(pos, col)
+            value = ocen_sytuacje(new_seq)
             values.append(value)
         maxValues.append(max(values))
 
@@ -93,13 +95,53 @@ def find_position():
     return min_index
 
 
-def ocen_sytuacje(ciag):
-    '''
+def ocen_sytuacje(sequence):
 
-    :param ciag:
-    :return:
-    '''
+    # zwraca maksymalną różnice między dopuszczalnym ciągiem między dowolnym kolorem (k_i)
+    # a najdłuższym ciągiem arytmetycznym lub 0 jeśli znalazł zwycięski ruch
 
+    global coloursDict
+
+    col_indexes = {col: [] for col in coloursDict.keys()}
+    aritmethic_max_lens = {col: 1 for col in coloursDict.keys()}
+
+    for start_ix, letter in enumerate(sequence):
+        col_indexes[letter].append(start_ix)
+
+    for col in coloursDict.keys():
+
+        if len(col_indexes[col]) == 0: # litra nie występuje w ciągu
+            aritmethic_max_lens[col] = 0
+            continue
+
+        for start_ix in range(len(col_indexes[col])): # indeks zaczynający ciąg
+
+            possible_progressions = (np.array(col_indexes[col]) - col_indexes[col][start_ix])[start_ix+1:] # bez progression = 1 (default)
+
+            if len(col_indexes[col]) - start_ix <= aritmethic_max_lens[col]: # nie ma już dłuższego ciągu
+                break
+
+            for prog in possible_progressions: # dla każdego możliwego progression
+
+                aritmethic_len = 1
+                last = start_ix
+
+                for i in range(start_ix + 1, len(col_indexes[col])):
+                    if col_indexes[col][i] < col_indexes[col][last] + prog:
+                        continue
+                    elif col_indexes[col][i] == col_indexes[col][last] + prog:
+                        aritmethic_len += 1
+                        last = i
+                    else:
+                        break
+
+                    if aritmethic_len > aritmethic_max_lens[col]: # zamiana wartości
+                        aritmethic_max_lens[col] = aritmethic_len
+
+    if min(np.array(list(coloursDict.values())) - np.array(list(aritmethic_max_lens.values()))) == 0: # wygrana komputera
+        return 0
+
+    return max(np.array(list(coloursDict.values())) - np.array(list(aritmethic_max_lens.values())))
 
 def print_seq():
     global seq
@@ -162,7 +204,9 @@ def main():
 
         win = False
         while not win and len(seq) < n:
-            position = computer_random()
+            #position = computer_random()
+            position = computer()
+
             print_seq()
             player(position)
             print_seq()
