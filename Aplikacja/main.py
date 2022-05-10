@@ -44,15 +44,14 @@ def winning_computer_condition():
 
     return False
 
+
 def computer():
-    # similar to computer() but analyzes one move ahead
     # computer's turn
     # inserts '_' in the chosen place
     #
     # returns the index corresponding to the insertion point of the new token
 
     global curr_seq
-    #trzeba dla kazdej pozycji sprawdzic czy nei konczy sie w jednym u=rucu jesli nie to liczyc drugi ruch
 
     pos = find_position()  # chosen position
     curr_seq.insert(pos, '_')
@@ -107,9 +106,10 @@ def find_position():
             new_seq.insert(pos, col)
             col_value = rate_position(new_seq)  # rate sequence
             col_values.append(col_value)
-        if max(col_values)==0:
+        if max(col_values) == 0:
             return pos
         else:
+            col_values = []
             for col in colours_dict.keys():  # check colour
                 new_seq = deepcopy(curr_seq)
                 new_seq.insert(pos, col)
@@ -139,7 +139,7 @@ def find_rating(seq):
         position_max_values.append(max(col_values))
 
     sequence_min_value = min(position_max_values)  # min value of the sequence
-    #min_index = position_max_values.index(sequence_min_value)  # chosen position
+    # min_index = position_max_values.index(sequence_min_value)  # chosen position
 
     return sequence_min_value
 
