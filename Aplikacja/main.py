@@ -44,7 +44,7 @@ def winning_computer_condition():
 
     return False
 
-def computer2():
+def computer():
     # similar to computer() but analyzes one move ahead
     # computer's turn
     # inserts '_' in the chosen place
@@ -53,21 +53,6 @@ def computer2():
 
     global curr_seq
     #trzeba dla kazdej pozycji sprawdzic czy nei konczy sie w jednym u=rucu jesli nie to liczyc drugi ruch
-
-    pos = find_position2()  # chosen position
-    curr_seq.insert(pos, '_')
-
-    return pos
-
-
-
-def computer():
-    # computer's turn
-    # inserts '_' in the chosen place
-    #
-    # returns the index corresponding to the insertion point of the new token
-
-    global curr_seq
 
     pos = find_position()  # chosen position
     curr_seq.insert(pos, '_')
@@ -104,7 +89,7 @@ def player(pos):
     print("Pozostało żetonów: ", n - len(curr_seq))
 
 
-def find_position2():
+def find_position():
     # computer strategy
     # finds a place in the sequence where the player must place a token
     # if the win is one move away it returns specific winning index, else it returns the index where placing the token
@@ -138,16 +123,16 @@ def find_position2():
     return min_index
 
 
-def find_rating(curr_seq):
+def find_rating(seq):
     # same as find_position, but takes sequence as argument and returns minimal possible rating of given sequence
     global colours_dict
 
     position_max_values = []  # max value for each position
 
-    for pos in range(len(curr_seq) + 1):  # check position
+    for pos in range(len(seq) + 1):  # check position
         col_values = []  # value for each colour
         for col in colours_dict.keys():  # check colour
-            new_seq = deepcopy(curr_seq)
+            new_seq = deepcopy(seq)
             new_seq.insert(pos, col)
             col_value = rate_position(new_seq)  # rate sequence
             col_values.append(col_value)
@@ -157,31 +142,6 @@ def find_rating(curr_seq):
     #min_index = position_max_values.index(sequence_min_value)  # chosen position
 
     return sequence_min_value
-
-
-def find_position():
-    # computer strategy
-    # finds a place in the sequence where the player must place a token
-    #
-    # returns an index of the best found position
-
-    global curr_seq, colours_dict
-
-    position_max_values = []  # max value for each position
-
-    for pos in range(len(curr_seq) + 1):  # check position
-        col_values = []  # value for each colour
-        for col in colours_dict.keys():  # check colour
-            new_seq = deepcopy(curr_seq)
-            new_seq.insert(pos, col)
-            col_value = rate_position(new_seq)  # rate sequence
-            col_values.append(col_value)
-        position_max_values.append(max(col_values))
-
-    sequence_min_value = min(position_max_values)  # min value of the sequence
-    min_index = position_max_values.index(sequence_min_value)  # chosen position
-
-    return min_index
 
 
 def rate_position(sequence):
@@ -327,7 +287,7 @@ def main():
         while not win and len(curr_seq) < n:
 
             if strategy == 1:
-                position = computer2()
+                position = computer()
             else:
                 position = computer_random()
 
