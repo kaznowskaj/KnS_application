@@ -1,8 +1,7 @@
 import random
 from string import ascii_lowercase
 import numpy as np
-from copy import deepcopy
-
+from copy import deepcopy, Error
 
 # declaration of global variables
 # n - number of tokens
@@ -74,16 +73,21 @@ def computer_random():
     return pos
 
 
-# TO_DO:
-# - input handling
 def player(pos):
     # player's turn
     # inserts colour chosen by player into the place chosen by computer
 
     global curr_seq, n, col_disp
 
-    print("Wstaw kolor ( dostępne", col_disp, "): ")
-    col = input()
+    while True:
+        try:
+            print("Wstaw kolor ( dostępne", col_disp, "): ")
+            col = input()
+            if col not in colours_dict.keys():
+                raise ValueError
+            break
+        except ValueError:
+            print("Wybierz poprawną opcję.\n")
     curr_seq[pos] = col
     print("Pozostało żetonów: ", n - len(curr_seq))
 
@@ -237,12 +241,26 @@ def create_col_disp():
     return col_disp
 
 
-# TO_DO:
-# - input handling
 def main():
     # main function - start of the programme
 
     global colours_dict, curr_seq, n, r, colours_list, col_disp
+
+    # exceptions classes
+
+    class ValueTooSmallError(Error):
+        """Raised when the input value is too small"""
+        pass
+
+    class ValueTooBigError(Error):
+        """Raised when the input value is too big"""
+        pass
+
+    class ValueBadError(Error):
+        """Raised when the value is bad lol"""
+        pass
+
+    # main function
 
     while True:
 
@@ -267,20 +285,79 @@ def main():
         print("Powodzenia!\n")
         print("############\n")
 
-        # input
-        n = int(input("Podaj liczbę żetonów: "))
-        r = int(input("Podaj liczbę dopuszczalnych kolorów: "))
+        ### input
+
+        # n - liczba zetonow
+        while True:
+            try:
+                n = input("Podaj liczbę żetonów: ")
+                n = int(n)
+                if n < 1:
+                    raise ValueTooSmallError
+                break
+            except ValueError:
+                print("Liczba żetonów musi być liczbą naturalną. Spróbuj ponownie.\n")
+            except ValueTooSmallError:
+                print("Liczba żetonów musi być liczbą naturalną. Spróbuj ponownie.\n")
+
+
+        # r - liczba kolorow
+        while True:
+            try:
+                r = input("Podaj liczbę dopuszczalnych kolorów: ")
+                r = int(r)
+                if r < 1:
+                    raise ValueTooSmallError
+                if r > n:
+                    raise ValueTooBigError
+                break
+            except ValueError:
+                print("Liczba kolorów musi być liczbą naturalną. Spróbuj ponownie.\n")
+            except ValueTooBigError:
+                print("Liczba kolorów nie może być większa niż liczba żetonów.\n")
+            except ValueTooSmallError:
+                print("Liczba kolorów musi być liczbą naturalną. Spróbuj ponownie.\n")
+
+
         colours_list = list(ascii_lowercase)[:r]
         col_disp = create_col_disp()
         print("Kolory to:", col_disp)
-        values = input("Podaj długości ciągów (liczby naturalne oddzielone spacją): ")
+
+
+        # values - długosci ciągów
+        while True:
+            try:
+                values = input("Podaj długości ciągów (liczby naturalne oddzielone spacją): ")
+                a_list = values.split()
+
+                if len(a_list) != r:
+                    raise ValueBadError
+
+                are_ints = all([isinstance(int(item), type(int))] for item in a_list)
+                break
+            except ValueError:
+                print("Długości ciągów muszą być liczbami naturalnymi. Spróbuj ponownie.\n")
+            except ValueBadError:
+                print("Liczba długości ciągów musi być taka sama jak liczba kolorów. Spróbuj ponownie.\n")
+
         create_colours_dict(values)
 
         # chose computer strategy
-        print("Wybierz strategię komputera (wpisz 1 lub 2): ")
-        print("\t 1. Strategia zaawansowana")
-        print("\t 2. Strategia losowa")
-        strategy = int(input())
+        while True:
+            try:
+                print("Wybierz strategię komputera (wpisz 1 lub 2): ")
+                print("\t 1. Strategia zaawansowana")
+                print("\t 2. Strategia losowa")
+                strategy = int(input())
+                if strategy!=1 and strategy!=2:
+                    raise ValueBadError
+
+                break
+            except ValueError:
+                print("Wpisz poprawną opcję (1 lub 2).\n")
+            except ValueBadError:
+                print("Wpisz poprawną opcję (1 lub 2).\n")
+
 
         # the game is on
         win = False
@@ -301,12 +378,22 @@ def main():
         else:
             print("Wygrana gracza")
 
+
         # game over
+        while True:
+            try:
+                cont = input("Czy chcesz zagrać ponownie? [y/n]: ")
+                if cont.lower() != "y" and cont.lower() != "n":
+                    raise ValueBadError
+                if cont.lower() == "y":
+                    print("Nowa gra \n\n\n")
+                else:
+                    return 0
+                break
+
+            except ValueBadError:
+                print("Wpisz poprawną opcję [y/n].\n")
         cont = input("Czy chcesz zagrać ponownie? [y/n]: ")
-        if cont.lower() == "y":
-            print("Nowa gra \n\n\n")
-        else:
-            return 0
 
 
 if __name__ == "__main__":
