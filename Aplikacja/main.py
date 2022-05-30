@@ -406,7 +406,6 @@ def main():
 
             except ValueBadError:
                 print("Wpisz poprawną opcję [y/n].\n")
-        cont = input("Czy chcesz zagrać ponownie? [y/n]: ")
 
 
 if __name__ == "__main__":
