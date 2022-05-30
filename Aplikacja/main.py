@@ -2,6 +2,10 @@ import random
 from string import ascii_lowercase
 import numpy as np
 from copy import deepcopy, Error
+import os
+from colorama import Fore
+from colorama import init
+
 
 # declaration of global variables
 # n - number of tokens
@@ -16,6 +20,33 @@ curr_seq = []
 colours_list = []
 # col_disp - colours display
 col_disp = ""
+# computers strategy
+strategy = -1
+
+
+def cls():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def display_curr_situation():
+    # prints current game info
+    global colours_dict, curr_seq, n, strategy
+
+    if strategy == 1:
+        print("Player 1's strategy: Advanced strategy")
+    else:
+        print("Player 1's strategy: Random strategy")
+    print("Colors and lengths: ", end="")
+    for key, val in colours_dict.items():
+        s = "" + str(key) + "(" + str(val) + "), "
+        print(s, end="")
+    print("\nTokens left: ", n - len(curr_seq) + 1)
+    print("\n----------------------------------------------------------------------------------------------------------"
+          "--------------")
+    print("Sequence: ", print_seq())
+    print("------------------------------------------------------------------------------------------------------------"
+          "------------")
+    print("Choose color: ")
 
 
 def winning_computer_condition():
@@ -30,7 +61,7 @@ def winning_computer_condition():
     for letter in colours_dict.keys():
         if colours_dict[letter] == 1:
             if letter in curr_seq:
-                return True
+                return True, [curr_seq.index(letter)]
 
     for letter_idx in range(len(curr_seq)):  # letter index
         letter = curr_seq[letter_idx]
@@ -39,9 +70,9 @@ def winning_computer_condition():
             while (letter_idx + cnt * prog) < len(curr_seq) and curr_seq[letter_idx + cnt * prog] == letter:
                 cnt += 1
             if cnt >= colours_dict[letter]:
-                return True
+                return True, [i for i in range(letter_idx, letter_idx + prog*(colours_dict[letter] - 1) + 1, prog)]
 
-    return False
+    return False, []
 
 
 def computer():
@@ -79,17 +110,18 @@ def player(pos):
 
     global curr_seq, n, col_disp
 
+    cls()
     while True:
         try:
-            print("Wstaw kolor ( dostępne", col_disp, "): ")
+            display_curr_situation()
             col = input()
             if col not in colours_dict.keys():
                 raise ValueError
             break
         except ValueError:
-            print("Wybierz poprawną opcję.\n")
+            cls()
+            print(Fore.RED + "Select the correct option.\n")
     curr_seq[pos] = col
-    print("Pozostało żetonów: ", n - len(curr_seq))
 
 
 def find_position():
@@ -215,7 +247,7 @@ def print_seq():
     displayed_seq = ""
     for letter in curr_seq:
         displayed_seq += letter
-    print(displayed_seq)
+    return displayed_seq
 
 
 def create_colours_dict(list_of_integers):
@@ -241,19 +273,39 @@ def create_col_disp():
 def check_if_n(table):
     good = True
     for i in table:
-        if i<1:
+        if i < 1:
             good = False
             break
     return good
 
 
+def display_comp_win(win_idx):
+    # message about computers win
+    global curr_seq
+
+    print("Sequence: ", end="")
+    for ix, letter in enumerate(curr_seq):
+        if ix in win_idx:
+            print(Fore.YELLOW + "" + letter, end="")
+        else:
+            print(letter, end="")
+    print("\n\nPlayer 1 won :(\n")
+
+
+def display_player_win():
+    # message about players win
+    print("Sequence: ", print_seq(), "\n")
+    print("You won!\n")
+
+
 def main():
     # main function - start of the programme
 
-    global colours_dict, curr_seq, n, r, colours_list, col_disp
+    global colours_dict, curr_seq, n, r, colours_list, col_disp, strategy
+    init(autoreset=True)  # coloring settings
+    os.system("title " + "Off-diagonal Van der Waerden online")
 
     # exceptions classes
-
     class ValueTooSmallError(Error):
         """Raised when the input value is too small"""
         pass
@@ -277,40 +329,78 @@ def main():
         curr_seq = []
         colours_list = []
         col_disp = ""
+        strategy = -1
 
         # initial prompt
-        print("\nLiczby Off-diagonal Van der Waerdena online")
-        print("Jesteś graczem 2.")
-        print("Razem z graczem 1 budujecie ciąg żetonów o maksymalnej długości n za pomocą r kolorów.")
-        print("Gracz 1 wybiera miejsce, w które musisz wstawić żeton (oznaczone \"_\").")
-        print("Wybierasz kolor żetonu, jaki wstawisz w to miejsce.")
-        print("Twoim zadaniem jest niedopuszczenie do ułożenia ciągu arytmetycznego z dowolnego z kolorów "
-              "o długości przypisanej do tego koloru.")
-        print("Gra kończy się zatem, gdy zostanie ułożone n żetonów (wygrana gracza 2) lub"
-              " zostanie ułożony ciag arytmetyczny z dowolnego koloru o zadanej długości (wygrana gracza 1).")
-        print("Powodzenia!\n")
-        print("############\n")
+        print(" _____  __  __           _ _                               _                                            "
+              "   ")
+        print("|  _  |/ _|/ _|         | (_)                             | |                                           "
+              "   ")
+        print("| | | | |_| |_ ______ __| |_  __ _  __ _  ___  _ __   __ _| |                                           "
+              "   ")
+        print("| | | |  _|  _|______/ _` | |/ _` |/ _` |/ _ \| '_ \ / _` | |                                           "
+              "   ")
+        print("\ \_/ / | | |       | (_| | | (_| | (_| | (_) | | | | (_| | |                                           "
+              "   ")
+        print(" \___/|_| |_|        \__,_|_|\__,_|\__, |\___/|_| |_|\__,_|_|                                           "
+              "   ")
+        print("                                    __/ |                                                               "
+              "   ")
+        print("                                   |___/                                                                "
+              "   ")
+        print(" _   _                   _             _    _                    _                          _ _         "
+              "   ")
+        print("| | | |                 | |           | |  | |                  | |                        | (_)        "
+              "   ")
+        print("| | | | __ _ _ __     __| | ___ _ __  | |  | | __ _  ___ _ __ __| | ___ _ __     ___  _ __ | |_ _ __   _"
+              "__ ")
+        print("| | | |/ _` | '_ \   / _` |/ _ \ '__| | |/\| |/ _` |/ _ \ '__/ _` |/ _ \ '_ \   / _ \| '_ \| | | '_ \ / "
+              "_ \\")
+        print("\ \_/ / (_| | | | | | (_| |  __/ |    \  /\  / (_| |  __/ | | (_| |  __/ | | | | (_) | | | | | | | | |  "
+              "__/")
+        print(" \___/ \__,_|_| |_|  \__,_|\___|_|     \/  \/ \__,_|\___|_|  \__,_|\___|_| |_|  \___/|_| |_|_|_|_| |_|\_"
+              "__|")
+        print("                                                                                                        "
+              "   ")
 
-        ### input
+        print("You are player 2!")
+        print("Your goal is to build a string consisting of n tokens using r colors.")
+        print("Player 1 chooses the place where you have to insert the token (marked with \"_\").")
+        print("You have to choose the color of the token.")
+        print("Your task is to prevent the formation of a monochromatic arithmetic progression with a given length \n"
+              "for each color. \n")
+        print("The game is over when:")
+        print("1. monochromatic arithmetic progression of any color with a given length has been formed "
+              "(Player 1 wins).")
+        print("2. n tokens have been placed (Player 2 wins)")
+        print("Good luck!\n\n")
 
-        # n - liczba zetonow
+        input("Press Enter to continue...")
+        cls()
+
+        # input
+
+        # n - number of tokens
         while True:
             try:
-                n = input("Podaj liczbę żetonów: ")
+                n = input("Enter the number of tokens to be placed (n): ")
                 n = int(n)
                 if n < 1:
                     raise ValueTooSmallError
                 break
             except ValueError:
-                print("Liczba żetonów musi być liczbą naturalną. Spróbuj ponownie.\n")
+                cls()
+                print(Fore.RED + "The number of tokens must be a natural number. Try again.\n")
             except ValueTooSmallError:
-                print("Liczba żetonów musi być liczbą naturalną. Spróbuj ponownie.\n")
+                cls()
+                print(Fore.RED + "The number of tokens must be a natural number. Try again.\n")
+        cls()
 
-
-        # r - liczba kolorow
+        # r - number of colors
         while True:
             try:
-                r = input("Podaj liczbę dopuszczalnych kolorów: ")
+                print("The number of tokens to be placed (n):", n)
+                r = input("Enter the number of colors (r): ")
                 r = int(r)
                 if r < 1:
                     raise ValueTooSmallError
@@ -318,28 +408,32 @@ def main():
                     raise ValueTooBigError
                 break
             except ValueError:
-                print("Liczba kolorów musi być liczbą naturalną. Spróbuj ponownie.\n")
+                cls()
+                print(Fore.RED + "The number of colors must be a natural number. Try again.\n")
             except ValueTooBigError:
-                print("Liczba kolorów nie może być większa niż liczba żetonów.\n")
+                cls()
+                print(Fore.RED + "The number of colors cannot exceed the number of tokens.\n")
             except ValueTooSmallError:
-                print("Liczba kolorów musi być liczbą naturalną. Spróbuj ponownie.\n")
-
+                cls()
+                print(Fore.RED + "The number of colors must be a natural number. Try again.\n")
+        cls()
 
         colours_list = list(ascii_lowercase)[:r]
         col_disp = create_col_disp()
-        print("Kolory to:", col_disp)
 
-
-        # values - długosci ciągów
+        # values - lengths
         while True:
             try:
-                values = input("Podaj długości ciągów (liczby naturalne oddzielone spacją): ")
+                print("The number of tokens to be placed (n):", n)
+                print("Colors:", col_disp, "\n")
+                values = input("Enter the lengths of the monochromatic arithmetic progressions (natural numbers"
+                               " separated by a space): ")
                 a_list = values.split()
 
                 if len(a_list) != r:
                     raise ValueBadError
 
-                are_ints = all([isinstance(int(item), type(int))] for item in a_list)
+                all([isinstance(int(item), type(int))] for item in a_list)
                 map_object = map(int, a_list)
                 list_of_integers = list(map_object)
                 good = check_if_n(list_of_integers)
@@ -347,33 +441,43 @@ def main():
                     raise ValueTooSmallError
                 break
             except ValueError:
-                print("Długości ciągów muszą być liczbami naturalnymi. Spróbuj ponownie.\n")
+                cls()
+                print(Fore.RED + "Lengths must be natural numbers. Try again.\n")
             except ValueTooSmallError:
-                print("Długości ciągów muszą być liczbami naturalnymi. Spróbuj ponownie.\n")
+                cls()
+                print(Fore.RED + "Lengths must be natural numbers. Try again.\n")
             except ValueBadError:
-                print("Liczba długości ciągów musi być taka sama jak liczba kolorów. Spróbuj ponownie.\n")
-
+                cls()
+                print(Fore.RED + "The number of lengths must be the same as the number of colors. Try again.\n")
+        cls()
         create_colours_dict(list_of_integers)
 
         # chose computer strategy
         while True:
             try:
-                print("Wybierz strategię komputera (wpisz 1 lub 2): ")
-                print("\t 1. Strategia zaawansowana")
-                print("\t 2. Strategia losowa")
+                print("The number of tokens to be placed (n):", n)
+                print("Colors and lengths: ", end="")
+                for key, val in colours_dict.items():
+                    s = "" + str(key) + "(" + str(val) + "), "
+                    print(s, end="")
+                print("\n\nChoose player 1's strategy (enter 1 or 2): ")
+                print("\t 1. Advanced strategy")
+                print("\t 2. Random strategy")
                 strategy = int(input())
                 if strategy != 1 and strategy != 2:
                     raise ValueBadError
-
                 break
             except ValueError:
-                print("Wpisz poprawną opcję (1 lub 2).\n")
+                cls()
+                print(Fore.RED + "Enter the correct option (1 or 2).\n")
             except ValueBadError:
-                print("Wpisz poprawną opcję (1 lub 2).\n")
-
+                cls()
+                print(Fore.RED + "Enter the correct option (1 or 2).\n")
+        cls()
 
         # the game is on
         win = False
+        win_idx = []
         while not win and len(curr_seq) < n:
 
             if strategy == 1:
@@ -381,31 +485,29 @@ def main():
             else:
                 position = computer_random()
 
-            print_seq()
             player(position)
-            print_seq()
-            win = winning_computer_condition()
-
-        if win:
-            print("Wygrana komputera")
-        else:
-            print("Wygrana gracza")
-
+            win, win_idx = winning_computer_condition()
+        cls()
 
         # game over
         while True:
             try:
-                cont = input("Czy chcesz zagrać ponownie? [y/n]: ")
+                if win:
+                    display_comp_win(win_idx)
+                else:
+                    display_player_win()
+                cont = input("Do you want to play again? [y/n]: ")
                 if cont.lower() != "y" and cont.lower() != "n":
                     raise ValueBadError
                 if cont.lower() == "y":
-                    print("Nowa gra \n\n\n")
+                    cls()
                 else:
                     return 0
                 break
 
             except ValueBadError:
-                print("Wpisz poprawną opcję [y/n].\n")
+                cls()
+                print(Fore.RED + "Enter the correct option [y/n].\n")
 
 
 if __name__ == "__main__":
