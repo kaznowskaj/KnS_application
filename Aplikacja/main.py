@@ -218,14 +218,11 @@ def print_seq():
     print(displayed_seq)
 
 
-def create_colours_dict(values):
+def create_colours_dict(list_of_integers):
     # creates colours_dict dictionary
 
     global colours_dict, colours_list
 
-    a_list = values.split()
-    map_object = map(int, a_list)
-    list_of_integers = list(map_object)
     keys = colours_list
     colours_dict = dict(zip(keys, list_of_integers))
 
@@ -239,6 +236,15 @@ def create_col_disp():
         col_disp = col_disp + i + ", "
     col_disp = col_disp[:-2]
     return col_disp
+
+
+def check_if_n(table):
+    good = True
+    for i in table:
+        if i<1:
+            good = False
+            break
+    return good
 
 
 def main():
@@ -334,13 +340,20 @@ def main():
                     raise ValueBadError
 
                 are_ints = all([isinstance(int(item), type(int))] for item in a_list)
+                map_object = map(int, a_list)
+                list_of_integers = list(map_object)
+                good = check_if_n(list_of_integers)
+                if not good:
+                    raise ValueTooSmallError
                 break
             except ValueError:
+                print("Długości ciągów muszą być liczbami naturalnymi. Spróbuj ponownie.\n")
+            except ValueTooSmallError:
                 print("Długości ciągów muszą być liczbami naturalnymi. Spróbuj ponownie.\n")
             except ValueBadError:
                 print("Liczba długości ciągów musi być taka sama jak liczba kolorów. Spróbuj ponownie.\n")
 
-        create_colours_dict(values)
+        create_colours_dict(list_of_integers)
 
         # chose computer strategy
         while True:
@@ -349,7 +362,7 @@ def main():
                 print("\t 1. Strategia zaawansowana")
                 print("\t 2. Strategia losowa")
                 strategy = int(input())
-                if strategy!=1 and strategy!=2:
+                if strategy != 1 and strategy != 2:
                     raise ValueBadError
 
                 break
