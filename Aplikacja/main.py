@@ -5,7 +5,7 @@ from copy import deepcopy, Error
 import os
 from colorama import Fore
 from colorama import init
-
+from itertools import chain
 
 # declaration of global variables
 # n - number of tokens
@@ -13,7 +13,9 @@ n = -1
 # r - number of colours
 r = -1
 # colours_dict - dictionary letter: sequence length
+# col_counts - counts of particular colors in sequence
 colours_dict = {}
+col_counts = {}
 # curr_seq - current sequence
 curr_seq = []
 # colours_list - used colours
@@ -108,7 +110,7 @@ def player(pos):
     # player's turn
     # inserts colour chosen by player into the place chosen by computer
 
-    global curr_seq, n, col_disp
+    global curr_seq, n, col_disp, col_counts
 
     cls()
     while True:
@@ -122,6 +124,8 @@ def player(pos):
             cls()
             print(Fore.RED + "Select the correct option.\n")
     curr_seq[pos] = col
+    col_counts[col] += 1
+
 
 
 def find_position():
@@ -297,11 +301,69 @@ def display_player_win():
     print("Sequence: ", print_seq(), "\n")
     print("You won!\n")
 
+def insertTest(max_length, color):
+    # seq = ['a', 'b', 'c', 'a', 'b', 'a', 'a', 'a', 'b', 'a']
+    global curr_seq, colours_dict
+    seq = curr_seq
+    indexes = []
+    diffs = []
+    # indexy koloru + odleglosci
+
+    for i in range(len(seq)):
+        if seq[i] == color:
+            indexes.append(i)
+    diffs = [(indexes[i]-indexes[i-1]) for i in range(1, len(indexes))]
+    print(indexes)
+    print(diffs)
+    max_diff = max(diffs)
+
+    # jesli skrajny zeton jest tym ktory powoduje ze max diff jest wieksze, i mamy wieksza liczbe zetonow niz minimalna
+    #mozna go wywalic
+
+    while True:
+        if diffs[0]==max_diff and len(diffs)>=colours_dict[color]:
+            diffs.pop(0)
+            indexes.pop(0)
+            max_diff=max(diffs)
+
+        elif diffs[len(diffs)-1]==max_diff and len(diffs)>=colours_dict[color]:
+            diffs.pop(len(diffs)-1)
+            indexes.pop(len(indexes)-1)
+            max_diff=max(diffs)
+        else:
+            break
+    #print(indexes)
+    #print(diffs)
+
+    # uzupelnienie ciągu
+    seq_len = 0
+    for i in range(len(diffs)-1, 0-1, -1):
+        seq_len += max_diff - diffs[i]
+
+    # # sprawdzenie
+    # indexes = []
+    # diffs = []
+    # for i in range(len(seq)):
+    #     if seq[i] == color:
+    #         indexes.append(i)
+    # diffs = [(indexes[i] - indexes[i - 1]) for i in range(1, len(indexes))]
+    # print(seq)
+    # print(indexes)
+    # print(diffs)
+
+    if seq_len+len(curr_seq) > max_length:
+        print("niedobrze")
+        print(indexes)
+        return None
+    else:
+        print("git")
+        return list(chain(*[[indexes[i]]*(max_diff-diffs[i]) for i in range(len(diffs))]))
+
 
 def main():
     # main function - start of the programme
 
-    global colours_dict, curr_seq, n, r, colours_list, col_disp, strategy
+    global colours_dict, curr_seq, n, r, colours_list, col_disp, strategy, col_counts
     init(autoreset=True)  # coloring settings
     os.system("title " + "Off-diagonal Van der Waerden online")
 
@@ -420,6 +482,7 @@ def main():
 
         colours_list = list(ascii_lowercase)[:r]
         col_disp = create_col_disp()
+        col_counts = dict(zip(colours_list, [0 for x in range(len(colours_list))]))
 
         # values - lengths
         while True:
@@ -478,10 +541,23 @@ def main():
         # the game is on
         win = False
         win_idx = []
+        indexes = None
         while not win and len(curr_seq) < n:
 
             if strategy == 1:
-                position = computer()
+                # if there is posibility to spread tokens to win
+                if indexes is None:
+                    indexes = None
+                    for col in col_counts:
+                        if col_counts[col] >= colours_dict[col]:
+                            indexes = insertTest(n, col)
+                            if indexes:
+                                break
+                if indexes:
+                    position = indexes.pop()+1
+                    curr_seq.insert(position, '_')
+                else:
+                    position = computer()
             else:
                 position = computer_random()
 
