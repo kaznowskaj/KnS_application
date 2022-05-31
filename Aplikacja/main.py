@@ -127,7 +127,6 @@ def player(pos):
     col_counts[col] += 1
 
 
-
 def find_position():
     # computer strategy
     # finds a place in the sequence where the player must place a token
@@ -162,14 +161,14 @@ def find_position():
     for i in range(len(position_max_values)):
         if position_max_values[i] == sequence_min_value:
             possible_indexes.append(i)
-    min_index = random.choice(possible_indexes) # chosen position
-    # position_max_values.index(sequence_min_value)  # chosen position
+    min_index = random.choice(possible_indexes)  # chosen position
 
     return min_index
 
 
 def find_rating(seq):
     # same as find_position, but takes sequence as argument and returns minimal possible rating of given sequence
+
     global colours_dict
 
     position_max_values = []  # max value for each position
@@ -290,6 +289,7 @@ def check_if_n(table):
 
 def display_comp_win(win_idx):
     # message about computers win
+
     global curr_seq
 
     print("Sequence: ", end="")
@@ -303,17 +303,20 @@ def display_comp_win(win_idx):
 
 def display_player_win():
     # message about players win
+
     print("Sequence: ", print_seq(), "\n")
     print("You won!\n")
 
-def insertTest(max_length, color):
+
+def insert_test(max_length, color):
+    # spreading tokens if win has been found
+
     global curr_seq, colours_dict
+
     seq = curr_seq
     indexes = []
-    diffs = []
 
     # colour indexes and distances between
-
     for i in range(len(seq)):
         if seq[i] == color:
             indexes.append(i)
@@ -322,16 +325,15 @@ def insertTest(max_length, color):
 
     while True:
 
-        # Shortening array of indexes needed to form progression after spreading
-
-        if diffs[len(diffs)-1]>diffs[0] and len(diffs)>=colours_dict[color]:
+        # shortening array of indexes needed to form progression after spreading
+        if diffs[len(diffs)-1] > diffs[0] and len(diffs) >= colours_dict[color]:
             diffs.pop(len(diffs) - 1)
             indexes.pop(len(indexes) - 1)
             max_diff = max(diffs)
-        elif diffs[len(diffs)-1]<=diffs[0] and len(diffs)>=colours_dict[color]:
+        elif diffs[len(diffs)-1] <= diffs[0] and len(diffs) >= colours_dict[color]:
             diffs.pop(0)
             indexes.pop(0)
-            max_diff=max(diffs)
+            max_diff = max(diffs)
         else:
             break
 
@@ -468,7 +470,7 @@ def main():
 
         colours_list = list(ascii_lowercase)[:r]
         col_disp = create_col_disp()
-        col_counts = dict(zip(colours_list, [0 for x in range(len(colours_list))]))
+        col_counts = dict(zip(colours_list, [0 for _ in range(len(colours_list))]))
 
         # values - lengths
         while True:
@@ -531,18 +533,19 @@ def main():
         while not win and len(curr_seq) < n:
 
             if strategy == 1:
-                # if there is posibility to spread tokens to win
+                # if there is possibility to spread tokens to win
                 if indexes is None:
                     indexes = None
                     for col in col_counts:
                         if col_counts[col] >= colours_dict[col]:
-                            indexes = insertTest(n, col)
+                            indexes = insert_test(n, col)
                             if indexes:
                                 break
                 if indexes:
                     position = indexes.pop()+1
                     curr_seq.insert(position, '_')
                 else:
+                    # else apply default strategy
                     position = computer()
             else:
                 position = computer_random()
