@@ -158,7 +158,12 @@ def find_position():
         position_max_values.append(max(col_values))
 
     sequence_min_value = min(position_max_values)  # min value of the sequence
-    min_index = position_max_values.index(sequence_min_value)  # chosen position
+    possible_indexes = []
+    for i in range(len(position_max_values)):
+        if position_max_values[i] == sequence_min_value:
+            possible_indexes.append(i)
+    min_index = random.choice(possible_indexes) # chosen position
+    # position_max_values.index(sequence_min_value)  # chosen position
 
     return min_index
 
@@ -334,11 +339,11 @@ def insertTest(max_length, color):
 
         # Shortening array of indexes needed to form progression after spreading
 
-        if diffs[len(diffs)-1]>diffs[0]:
+        if diffs[len(diffs)-1]>diffs[0] and len(diffs)>=colours_dict[color]:
             diffs.pop(len(diffs) - 1)
             indexes.pop(len(indexes) - 1)
             max_diff = max(diffs)
-        elif diffs[len(diffs)-1]<=diffs[0]:
+        elif diffs[len(diffs)-1]<=diffs[0] and len(diffs)>=colours_dict[color]:
             diffs.pop(0)
             indexes.pop(0)
             max_diff=max(diffs)
@@ -364,11 +369,8 @@ def insertTest(max_length, color):
     # print(diffs)
 
     if seq_len+len(curr_seq) > max_length:
-        print("niedobrze")
-        print(indexes)
         return None
     else:
-        print("git")
         return list(chain(*[[indexes[i]]*(max_diff-diffs[i]) for i in range(len(diffs))]))
 
 
