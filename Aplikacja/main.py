@@ -321,14 +321,26 @@ def insertTest(max_length, color):
     #mozna go wywalic
 
     while True:
-        if diffs[0]==max_diff and len(diffs)>=colours_dict[color]:
+
+        # if diffs[0]==max_diff and len(diffs)>=colours_dict[color]:
+        #     diffs.pop(0)
+        #     indexes.pop(0)
+        #     max_diff=max(diffs)
+        #
+        # elif diffs[len(diffs)-1]==max_diff and len(diffs)>=colours_dict[color]:
+        #     diffs.pop(len(diffs)-1)
+        #     indexes.pop(len(indexes)-1)
+        #     max_diff=max(diffs)
+
+        # Shortening array of indexes needed to form progression after spreading
+
+        if diffs[len(diffs)-1]>diffs[0]:
+            diffs.pop(len(diffs) - 1)
+            indexes.pop(len(indexes) - 1)
+            max_diff = max(diffs)
+        elif diffs[len(diffs)-1]<=diffs[0]:
             diffs.pop(0)
             indexes.pop(0)
-            max_diff=max(diffs)
-
-        elif diffs[len(diffs)-1]==max_diff and len(diffs)>=colours_dict[color]:
-            diffs.pop(len(diffs)-1)
-            indexes.pop(len(indexes)-1)
             max_diff=max(diffs)
         else:
             break
