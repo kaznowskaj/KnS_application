@@ -307,35 +307,20 @@ def display_player_win():
     print("You won!\n")
 
 def insertTest(max_length, color):
-    # seq = ['a', 'b', 'c', 'a', 'b', 'a', 'a', 'a', 'b', 'a']
     global curr_seq, colours_dict
     seq = curr_seq
     indexes = []
     diffs = []
-    # indexy koloru + odleglosci
+
+    # colour indexes and distances between
 
     for i in range(len(seq)):
         if seq[i] == color:
             indexes.append(i)
     diffs = [(indexes[i]-indexes[i-1]) for i in range(1, len(indexes))]
-    print(indexes)
-    print(diffs)
     max_diff = max(diffs)
 
-    # jesli skrajny zeton jest tym ktory powoduje ze max diff jest wieksze, i mamy wieksza liczbe zetonow niz minimalna
-    #mozna go wywalic
-
     while True:
-
-        # if diffs[0]==max_diff and len(diffs)>=colours_dict[color]:
-        #     diffs.pop(0)
-        #     indexes.pop(0)
-        #     max_diff=max(diffs)
-        #
-        # elif diffs[len(diffs)-1]==max_diff and len(diffs)>=colours_dict[color]:
-        #     diffs.pop(len(diffs)-1)
-        #     indexes.pop(len(indexes)-1)
-        #     max_diff=max(diffs)
 
         # Shortening array of indexes needed to form progression after spreading
 
@@ -349,24 +334,11 @@ def insertTest(max_length, color):
             max_diff=max(diffs)
         else:
             break
-    #print(indexes)
-    #print(diffs)
 
-    # uzupelnienie ciągu
+    # check if spreading is possible
     seq_len = 0
     for i in range(len(diffs)-1, 0-1, -1):
         seq_len += max_diff - diffs[i]
-
-    # # sprawdzenie
-    # indexes = []
-    # diffs = []
-    # for i in range(len(seq)):
-    #     if seq[i] == color:
-    #         indexes.append(i)
-    # diffs = [(indexes[i] - indexes[i - 1]) for i in range(1, len(indexes))]
-    # print(seq)
-    # print(indexes)
-    # print(diffs)
 
     if seq_len+len(curr_seq) > max_length:
         return None
